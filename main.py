@@ -99,7 +99,7 @@ def main():
         criterion=criterion,
         optimizer=optimizer,
         device=device,
-        epochs=args.epochs,
+        num_epochs=args.epochs,
         output_dir=exp_output_dir
     )
 
