@@ -3,3 +3,4 @@ data/
 gt_training.csv
 outputs/
 __pycache__/
+*.pdf
