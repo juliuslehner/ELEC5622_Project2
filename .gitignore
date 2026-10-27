@@ -1,3 +1,5 @@
 ﻿venv/
 data/
 gt_training.csv
+outputs/
+__pycache__/
