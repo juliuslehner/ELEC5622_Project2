@@ -8,13 +8,24 @@ def build_model(arch="resnet34", strategy="partial", num_classes=6):
     Builds AlexNet or ResNet34 with ImageNet weights and adapts output head.
     """
     if arch == "alexnet":
-        # -------------------------------------------------------------
-        # TODO: Group partner to implement AlexNet fine-tuning logic:
-        # 1. Load pretrained AlexNet weights
-        # 2. Replace model.classifier[6] with nn.Linear(4096, num_classes)
-        # 3. Apply partial freezing (freeze features) vs full training
-        # -------------------------------------------------------------
-        raise NotImplementedError("AlexNet is not implemented yet. Group partner to complete.")
+        model = models.alexnet(weights=models.AlexNet_Weights.IMAGENET1K_V1)
+        in_features = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(in_features, num_classes)
+
+        if strategy == "partial":
+            for param in model.features.parameters():
+                param.requires_grad = False
+            for param in model.classifier.parameters():
+                param.requires_grad = True
+
+        elif strategy == "full":
+            for param in model.parameters():
+                param.requires_grad = True
+
+        else:
+            raise ValueError(f"Unknown strategy '{strategy}'. Choose 'partial' or 'full'.")
+
+        return model
 
     elif arch == "resnet34":
         # 1. Initialize with ImageNet-pretrained weights
