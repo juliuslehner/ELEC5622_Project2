@@ -1,10 +1,3 @@
-"""
-evaluate.py - Standalone evaluation CLI for HEp-2 cell classification.
-Evaluates saved model checkpoints on the test set, generates normalized
-confusion matrices, outputs per-class classification reports, and logs
-all terminal outputs to the target experiment directory.
-"""
-
 import os
 import sys
 import argparse
@@ -70,7 +63,7 @@ def main():
     print(f"Output directory: {args.output_dir}")
     print("=" * 65)
 
-    # 1. Load Data (deterministic test set)
+    # Load Data
     _, _, test_loader = get_dataloaders(
         data_dir=args.data_dir,
         csv_path=args.csv_path,
@@ -78,7 +71,7 @@ def main():
         num_workers=args.num_workers
     )
 
-    # 2. Locate and Load Checkpoint
+    # Locate and Load Checkpoint
     checkpoint_path = args.checkpoint or os.path.join(args.output_dir, "best_model.pth")
     if not os.path.exists(checkpoint_path):
         raise FileNotFoundError(f"Checkpoint not found at: {checkpoint_path}")
@@ -88,7 +81,7 @@ def main():
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     model.eval()
 
-    # 3. Test Inference
+    # Test Inference
     all_preds, all_labels = [], []
     with torch.no_grad():
         for images, labels in test_loader:
@@ -100,12 +93,12 @@ def main():
 
     class_names = ["Centromere", "Golgi", "Homogeneous", "NuMem", "Nucleolar", "Speckled"]
 
-    # 4. Classification Metrics
+    # Classification Metrics
     report_text = classification_report(all_labels, all_preds, target_names=class_names, digits=4)
     print("\nPER-CLASS CLASSIFICATION REPORT:")
     print(report_text)
 
-    # 5. Plot and Save Normalized Confusion Matrix
+    # Plot and Save Normalized Confusion Matrix
     cm = confusion_matrix(all_labels, all_preds, normalize="true")
     fig, ax = plt.subplots(figsize=(8, 7))
     cax = ax.matshow(cm, cmap=plt.cm.Blues, alpha=0.85)

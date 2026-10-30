@@ -18,18 +18,18 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         images = images.to(device)
         labels = labels.to(device)
 
-        # 1. Reset gradients from the previous batch
+        # Reset gradients from the previous batch
         optimizer.zero_grad()
 
-        # 2. Forward pass: compute predicted logits
+        # Forward pass: compute predicted logits
         outputs = model(images)
         loss = criterion(outputs, labels)
 
-        # 3. Backward pass: compute gradients and step optimizer
+        # Backward pass: compute gradients and step optimizer
         loss.backward()
         optimizer.step()
 
-        # 4. Running metrics accumulation
+        # Running metrics accumulation
         running_loss += loss.item() * images.size(0)
         _, preds = torch.max(outputs, dim=1)
         correct += torch.sum(preds == labels).item()

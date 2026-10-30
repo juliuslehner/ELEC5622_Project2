@@ -48,7 +48,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # 1. Device configuration (GPU on Colab, CPU locally)
+    # Device configuration (GPU on Colab, CPU locally)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
@@ -60,8 +60,7 @@ def main():
     log_path = os.path.join(run_dir, "train.log")
     sys.stdout = TeeLogger(log_path)
 
-    # 2. Build DataLoaders
-    # On Windows/CPU we default to 0 workers to avoid subprocess hangs; on Colab CUDA we use 2
+    # Build DataLoaders, default to two workers on Colab and zero on CPU
     num_workers = 2 if torch.cuda.is_available() else 0
     print(f"Loading data from '{args.data_dir}'...")
     train_loader, val_loader, test_loader = get_dataloaders(
@@ -71,7 +70,7 @@ def main():
         num_workers=num_workers
     )
 
-    # 3. Instantiate model & report parameter counts for Task 4
+    # Instantiate model & report parameter counts for Task 4
     model = build_model(arch=args.arch, strategy=args.strategy, num_classes=6)
     model = model.to(device)
 
@@ -80,13 +79,13 @@ def main():
     print(f"[{args.arch.upper()} | {args.strategy.upper()}] "
           f"Trainable params: {trainable_params:,} / {total_params:,} ({pct:.2f}%)")
 
-    # 4. Setup loss criterion and optimizer
+    # Setup loss criterion and optimizer
     criterion = nn.CrossEntropyLoss()
     # Filter only parameters that have requires_grad=True
     trainable_weights = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = torch.optim.Adam(trainable_weights, lr=args.lr)
 
-    # 5. Train model across epochs, track validation loss, save best_model.pth
+    # Train model across epochs, track validation loss, save best_model.pth
     best_epoch, total_time = train_model(
         model=model,
         train_loader=train_loader,
@@ -98,14 +97,14 @@ def main():
         output_dir=run_dir
     )
 
-    # 6. Evaluate final test performance using the best validation checkpoint
+    # Evaluate final test performance using the best validation checkpoint
     best_model_path = os.path.join(run_dir, "best_model.pth")
     print(f"\nLoading best checkpoint (Epoch {best_epoch}) for final test evaluation...")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
 
     test_loss, test_acc = evaluate(model, test_loader, criterion, device)
 
-    # 7. Print summary block (ready for copying into report tables)
+    # Print summary block
     print("=" * 65)
     print(f"FINAL METRICS: {args.arch.upper()} ({args.strategy.upper()})")
     print(f"- Optimal Epoch:       {best_epoch}")

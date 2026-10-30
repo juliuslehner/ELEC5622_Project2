@@ -28,26 +28,26 @@ def build_model(arch="resnet34", strategy="partial", num_classes=6):
         return model
 
     elif arch == "resnet34":
-        # 1. Initialize with ImageNet-pretrained weights
+        # Initialize with ImageNet-pretrained weights
         model = models.resnet34(weights=models.ResNet34_Weights.IMAGENET1K_V1)
 
-        # 2. Replace final 1000-class layer with 6-class classifier
+        # Replace final 1000-class layer with 6-class classifier
         in_features = model.fc.in_features  # 512
         model.fc = nn.Linear(in_features, num_classes)
 
-        # 3. Apply layer freezing strategy
+        # Apply layer freezing strategy
         if strategy == "partial":
-            # Freeze stem and early residual blocks (conv1, bn1, layer1, layer2, layer3)
+            # Freezebearly blocks (conv1, bn1, layer1, layer2, layer3)
             for param in model.parameters():
                 param.requires_grad = False
-            # Train only the final residual block (layer4) and the classification head (fc)
+            # Train only the final residual block and fully connected layer
             for param in model.layer4.parameters():
                 param.requires_grad = True
             for param in model.fc.parameters():
                 param.requires_grad = True
 
         elif strategy == "full":
-            # Train all 34 layers end-to-end
+            # Train all layers
             for param in model.parameters():
                 param.requires_grad = True
 
