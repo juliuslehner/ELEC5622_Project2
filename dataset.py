@@ -18,7 +18,7 @@ CLASS_TO_IDX = {name: i for i, name in enumerate(CLASS_NAMES)}
 
 
 class DiscreteRotation:
-    """Rotates an image by random multiples of 18 degrees on the fly (Gao et al.)."""
+    """Rotates an image by random multiples of 18 degrees on the fly."""
     def __init__(self, step=18):
         self.angles = list(range(0, 360, step))
 
@@ -50,7 +50,7 @@ class HEp2Dataset(Dataset):
         self.folder_path = folder_path
         self.transform = get_transforms(is_train=is_train)
 
-        # 1. Read CSV and map 5-digit filename -> label index
+        # Read CSV and map 5-digit filename to label index
         df = pd.read_csv(csv_path)
         id_col = df.columns[0]
         class_col = df.columns[1]
@@ -60,7 +60,7 @@ class HEp2Dataset(Dataset):
             filename = f"{int(row[id_col]):05d}.png"
             label_map[filename] = CLASS_TO_IDX[str(row[class_col]).strip()]
 
-        # 2. Gather image paths physically present in this split folder
+        # Gather image paths physically present in split folder
         self.image_paths = []
         self.labels = []
 
@@ -75,7 +75,7 @@ class HEp2Dataset(Dataset):
         return len(self.image_paths)
 
     def __getitem__(self, idx):
-        # Load one image lazily on demand
+        # Load one image on demand
         img = Image.open(self.image_paths[idx])
         img = self.transform(img)
         label = self.labels[idx]
